@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"
+    />
+	<title>百度网盘秒传链接转存</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+<script type="text/javascript">
+function atou(str) {
+    return decodeURIComponent(escape(window.atob(str)));
+}
+function Trim(str){  
+    return str.replace(/(^\s*)|(\s*$)/g, "");  
+}  
+function addbdstoken(){
+var x=document.getElementById("save")
+x.action="https://pan.baidu.com/api/rapidupload?app_id=250528&bdstoken="+ document.getElementById("bdstoken").value +"&channel=chunlei&clienttype=0&rtype=1&web=1"
+}
+function copy(){
+const input = document.querySelector('#copy_script');
+	input.select();
+	if (document.execCommand('copy')) {
+		document.execCommand('copy');
+		alert('复制成功');
+}
+}
+function getLink() {
+var bdpan = document.getElementById('link').value.match(/bdpan:\/\/(.+)/);;
+var pcs = document.getElementById('link').value.match('BaiduPCS-Go');
+var mengji = document.getElementById('link').value.match(/.{32}#.{32}/);
+if (bdpan != null){
+var de_b64 = atou(bdpan[1]);
+var md5 = de_b64.match(/\|(.{32})\|/)[1];
+var slicemd5 = de_b64.match(/\|([^\|]{32})$/)[1];
+var file_length = de_b64.match(/\|([0-9]+)\|/)[1];
+var file_name = de_b64.match(/^(.+\.[a-zA-Z]{1,9})\|/)[1];
+saveFile(md5, slicemd5, file_length, file_name, bdpan);
+}
+else if (pcs){
+var input = document.getElementById('link').value;
+var length = input.match(/length\=([0-9]+)/)[1];
+var md5 = input.match(/\-md5\=(.{32})/)[1];
+var slicemd5 = input.match(/\-slicemd5\=(.{32})/)[1];
+var file_name = input.match(/\"(.+)\"/)[1];
+saveFile(md5, slicemd5, length, file_name, pcs);
+
+}
+else if (mengji){
+var input = document.getElementById('link').value;
+var md5 = input.match(/^(.{32})#/)[1];
+var slicemd5 = input.match(/#(.{32})#/)[1];
+var file_length = input.match(/#([0-9]+)#/)[1];
+var file_name = input.match(/#[0-9]+#(.+)$/)[1];
+file_name = Trim(file_name);
+saveFile(md5, slicemd5, file_length, file_name, mengji);
+}
+}
+function saveFile(md5,slicemd5,length,name,method){
+var saveForm = document.createElement("form");
+document.body.appendChild(saveForm);
+saveForm.method = 'POST';
+saveForm.target = '_blank';
+saveForm.action = "https://pan.baidu.com/api/rapidupload?app_id=250528&bdstoken="+ document.getElementById("bdstoken").value +"&channel=chunlei&clienttype=0&rtype=1&web=1";
+var path = document.createElement("input");
+path.setAttribute("type", "hidden");
+path.setAttribute("name", "path");
+saveForm.appendChild(path);
+if (method == 'pcs'){
+path.setAttribute("value",  name)
+}
+else
+{
+path.setAttribute("value",'/' + name)
+}
+var md5_input = document.createElement("input");
+md5_input.setAttribute("type", "hidden");
+md5_input.setAttribute("name", "content-md5");
+saveForm.appendChild(md5_input);
+md5_input.setAttribute("value", md5);
+var slice_md5 = document.createElement("input");
+slice_md5.setAttribute("type", "hidden");
+slice_md5.setAttribute("name", "slice-md5");
+saveForm.appendChild(slice_md5);
+slice_md5.setAttribute("value", slicemd5);
+var file_length = document.createElement("input");
+file_length.setAttribute("type", "hidden");
+file_length.setAttribute("name", "content-length");
+saveForm.appendChild(file_length);
+file_length.setAttribute("value", length);
+saveForm.submit();
+}
+</script>
+</head>
+<body>
+    <div id="app">
+      <div id="container" class="container">
+        <div class="row">
+<div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+<h1>百度网盘秒传链接转存</h1>
+<p>v0.2</p>
+<p><a href='./gen.html'>秒传链接在线生成</a></p>
+<p><a href='./convert.html'>秒传链接在线转换</a></p>
+<b>iOS使用方法：</b>保存本页面到书签，编辑，在地址处粘贴下面的代码，之后在PC版百度网盘页面打开书签</br>
+</br>
+复制代码到登录后的<a href="https://pan.baidu.com/disk/home" target=_blank>百度网盘</a>地址栏获取bdstoken</br>
+<b>手机请选择请求PC版网页</b></br>
+粘贴后在开头手动添加 <b>javascript:</b>
+
+
+</div>
+<div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+<p><input class="form-control" id="copy_script" value="javascript:for(i=0;i < document.getElementsByTagName('script').length;i++){var scripts=document.getElementsByTagName('script')[i].innerHTML.match(/\'\w{32}\'/);if(scripts!=null){var bdstoken=scripts[0].substring(1,33);}}const input=document.createElement('input');document.body.appendChild(input);input.setAttribute('value',bdstoken);input.select();if(document.execCommand('copy')){document.execCommand('copy');alert('bdstoken '+bdstoken+'\n复制成功');}document.body.removeChild(input);">
+</p>
+<button class="btn btn-primary" id="copy" onclick=copy();>复制代码</button>
+
+</div>
+
+<div id="body" class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+
+  <div>
+    </br><label for="bdstoken">bdstoken（必填）</label>
+    <p><input name="bdstoken" class="form-control" id="bdstoken" placeholder="32位"></p>
+  </div>
+  <div>
+  <label for="link">秒传链接</label>
+  <p><input name="link" id="link" class="form-control" placeholder="bdpan... / BaiduPCS-Go ... / 5b1...#b3a... "></p>
+  </div>
+  <p><button onclick=getLink(); class="btn btn-primary">解析链接并转存</button></p>
+<a data-toggle="collapse" data-parent="#body" href="#collapseOne">
+<p>手动输入文件属性</p>
+</a>
+<div id="collapseOne" class="panel-collapse collapse in">
+<form id="save" action='' method='POST' target=_blank>
+  <div>
+    <label for="path">文件保存路径</label>
+    <input name="path" class="form-control" id="path" placeholder="/数理化.doc">
+  </div>
+  <div>
+    <label for="length">文件大小(length)</label>
+    <input name="content-length" class="form-control" id="length" placeholder="1710630793">
+  </div>
+  <div>
+    <label for="md5">文件MD5</label>
+    <input name="content-md5" class="form-control" id="md5" placeholder="b3a90c47ea23b00aad062a09e33d6ce7">
+  </div>
+  <div>
+    <label for="slicemd5">前256KB分片MD5(slicemd5)</label>
+    <input name="slice-md5" class="form-control" id="slicemd5" placeholder="5b1cfe5072aabc737e6facce6d1c3be8">
+  </div>
+  </br>
+  <p><button onclick=addbdstoken(); class="btn btn-primary">转存</button></p>
+  
+</form>
+</div>
+<p>显示 {"errno":2} 为保存失败，检查输入的内容是否正确</br>{"errno":404} 为服务器无对应文件</br>{"errno":-6} 为未登录</br>{"errno":0} 为保存成功
+</br>
+<b>所有请求在用户端进行，本站不保存任何链接</b>
+</p>
+</div>
+</div></div></div>
+</body>

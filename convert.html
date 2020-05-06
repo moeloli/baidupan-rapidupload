@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"
+    />
+	<title>百度网盘秒传链接生成</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+	<script type="text/javascript">
+	function atou(str) {
+    return decodeURIComponent(escape(window.atob(str)));
+}
+function utoa(str) {
+    return window.btoa(unescape(encodeURIComponent(str)));
+}
+function Trim(str){  
+    return str.replace(/(^\s*)|(\s*$)/g, "");  
+}  
+function getLink(link,backcall) {
+var bdpan = link.match(/bdpan:\/\/(.+)/);;
+var pcs = link.match('BaiduPCS-Go');
+var mengji = link.match(/.{32}#.{32}/);
+if (bdpan != null){
+var de_b64 = atou(bdpan[1]);
+var md5 = de_b64.match(/\|(.{32})\|/)[1];
+var slicemd5 = de_b64.match(/\|([^\|]{32})$/)[1];
+var file_length = de_b64.match(/\|([0-9]+)\|/)[1];
+var file_name = de_b64.match(/^(.+\.[a-zA-Z]{1,9})\|/)[1];
+backcall(md5, slicemd5, file_length, file_name);
+}
+else if (pcs){
+var input = link;
+var length = input.match(/length\=([0-9]+)/)[1];
+var md5 = input.match(/\-md5\=(.{32})/)[1];
+var slicemd5 = input.match(/\-slicemd5\=(.{32})/)[1];
+var file_name = input.match(/\"(.+)\"/)[1];
+backcall(md5, slicemd5, length, file_name);
+
+}
+else if (mengji){
+var input = link;
+var md5 = input.match(/^(.{32})#/)[1];
+var slicemd5 = input.match(/#(.{32})#/)[1];
+var file_length = input.match(/#([0-9]+)#/)[1];
+var file_name = input.match(/#[0-9]+#(.+)$/)[1];
+file_name = Trim(file_name);
+backcall(md5, slicemd5, file_length, file_name);
+}
+}
+function convertpcs(md5, slicemd5, file_length, file_name){
+return 'BaiduPCS-Go rapidupload -length=' + file_length + ' -md5=' + md5 + ' -slicemd5=' + slicemd5 + ' \"\/' + file_name + '\"';
+}function convertpcs(md5, slicemd5, file_length, file_name){
+return 'BaiduPCS-Go rapidupload -length=' + file_length + ' -md5=' + md5 + ' -slicemd5=' + slicemd5 + ' \"\/' + file_name + '\"';
+}
+		function convert(){
+		document.getElementById('convert').innerHTML = '';
+	var lines = document.getElementById('link').value.split('\n');
+	for(var i = 0;i < lines.length;i++){
+    //code here using lines[i] which will give you each line
+	if (document.getElementById('pcs').className == 'btn btn-outline-primary active'){
+	getLink(lines[i],backcall = function(md5, slicemd5, file_length, file_name){
+	document.getElementById('convert').innerHTML += 'BaiduPCS-Go rapidupload -length=' + file_length + ' -md5=' + md5 + ' -slicemd5=' + slicemd5 + ' \"\/' + file_name + '\"' + '\n';
+	});
+	}
+	if (document.getElementById('bdpan').className == 'btn btn-outline-primary active'){
+	getLink(lines[i],backcall = function(md5, slicemd5, file_length, file_name){
+	
+	document.getElementById('convert').innerHTML += 'bdpan://' + utoa(file_name + '\|' + file_length + '\|' + md5 + '\|' + slicemd5) + '\n';
+	});
+	}
+	if (document.getElementById('mengji').className == 'btn btn-outline-primary active'){
+	getLink(lines[i],backcall = function(md5, slicemd5, file_length, file_name){
+	document.getElementById('convert').innerHTML += md5 + '#'+slicemd5+'#'+file_length+'#'+file_name+ '\n';
+	});
+	}
+}
+	}
+	</script>
+	<style>
+	</style>
+</head>
+<body>
+    <div id="app">
+      <div id="container" class="container">
+        <div class="row">
+<div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+<h1>百度网盘秒传链接转换</h1>
+<p>v0.1</p>
+<p><a href='./index.html'>秒传链接在线转存</a></p>
+<p><a href='./gen.html'>秒传链接在线生成</a></p>
+</div>
+<div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+</div>
+<div id="body" class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+
+    <div class="form-group">
+    <label for="link">秒传链接</label>
+    <p><textarea name="link" id="link" class="form-control" placeholder="需要转换的链接" rows="8"></textarea></p>
+	    <div class="btn-group" data-toggle="buttons">
+        <label class="btn btn-outline-primary active" id="pcs">
+            <input  type="radio" style="display:none;" id="pcs" name="options" checked> BaiduPCS-Go
+        </label>
+        <label class="btn btn-outline-primary" id="bdpan">
+            <input  type="radio" style="display:none;" id="bdpan" name="options"> PanDownload
+        </label>
+        <label class="btn btn-outline-primary" id="mengji">
+            <input  type="radio" style="display:none;" id="mengji" name="options"> 梦姬
+        </label>
+    </div>
+	<p><button class="btn btn-primary" onclick="convert();">转换</button>
+	<p><textarea name="convert" id="convert" class="form-control" placeholder="转换后的链接" rows="8"></textarea></p>
+  </div>
+   <p><b>所有请求在用户端进行，本站不保存任何链接</b></p>
+ </div>
+
+
+</div></div></div>
+</body>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"
+    />
+	<title>百度网盘秒传链接生成</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+	<script type="text/javascript">
+	</script>
+</head>
+<body>
+    <div id="app">
+      <div id="container" class="container">
+        <div class="row">
+<div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+<h1>百度网盘秒传链接生成</h1>
+<p>v0.1</p>
+<p><b>支持批量生成</b></p>
+<p><a href='./index.html'>秒传链接在线转存</a></p>
+<p><a href='./convert.html'>秒传链接在线转换</a></p>
+</div>
+<div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+<input id=file type=file placeholder="select a file" multiple>
+		<p><pre id=log></pre></p>
+		<script src="https://cdn.rawgit.com/satazor/SparkMD5/master/spark-md5.min.js"></script>
+		<script>
+		document.getElementById("file").addEventListener("change", function() {
+		for(i=0;i<file.files.length;i++){
+		var file_md5;
+		var file_length;
+		var file_name;
+		var slice_md5;
+		var file_amount= file.files.length;
+
+		calculate(file.files[i],file_amount,i,		callBack=function(md5,file){
+
+		slicemd5(file,callBack = function(slicemd5){
+		document.body.appendChild(document.createElement('input')).id = 'link' + i;
+		document.getElementById('link'+i).type = 'hidden';
+		document.getElementById('link'+i).setAttribute('value', slicemd5);
+		var file_count = 1;
+		file_md5 = md5;
+		file_length = file.size;
+		file_name = file.name;
+		slice_md5 = document.getElementById('link'+i).value;
+		link = file_md5 + '#' + slice_md5 + '#' + file_length + '#' + file_name
+		document.getElementById('link').innerHTML += link + '\n';
+		document.body.removeChild(document.getElementById('link'+i));
+		
+		})
+
+		});
+
+		
+		}
+		})
+function slicemd5(file,callBack){
+	    var fileReader = new FileReader(),  
+        blobSlice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice,  
+        chunkSize = 262144,  
+        // read in chunks of 256KB  
+        chunks = Math.ceil(1),  
+        currentChunk = 0,  
+        spark = new SparkMD5();  
+		
+    fileReader.onload = function(e) {  
+        spark.appendBinary(e.target.result); // append binary string  
+        currentChunk++;  
+  
+        if (currentChunk < chunks) {  
+            loadNext();  
+        }  
+        else {  
+            callBack(spark.end());
+        }  
+    };  
+  
+    function loadNext() {  
+        var start = currentChunk * chunkSize,  
+            end = start + chunkSize >= file.size ? file.size : start + chunkSize;  
+  
+        fileReader.readAsBinaryString(blobSlice.call(file, start, end));  
+    };  
+  
+    loadNext();  
+	}
+function calculate(file,file_amount,i,callBack){  
+    var fileReader = new FileReader(),  
+        blobSlice = File.prototype.mozSlice || File.prototype.webkitSlice || File.prototype.slice,  
+        chunkSize = 2097152,  
+        // read in chunks of 2MB  
+        chunks = Math.ceil(file.size / chunkSize),  
+        currentChunk = 0,  
+        spark = new SparkMD5();  
+		
+    fileReader.onload = function(e) {  
+        spark.appendBinary(e.target.result); // append binary string  
+        currentChunk++;  
+  
+        if (currentChunk < chunks) {  
+            loadNext();  
+        }  
+        else {  
+		if(i>0){
+		document.getElementById('log').innerHTML = 'calculating ' + i + ' of ' + file_amount + ' files';
+        }
+		else{
+		document.getElementById('log').innerHTML = 'done'
+		}
+		callBack(spark.end(),file);
+            
+			
+        }  
+    };  
+  
+    function loadNext() {  
+        var start = currentChunk * chunkSize,  
+            end = start + chunkSize >= file.size ? file.size : start + chunkSize;  
+  
+        fileReader.readAsBinaryString(blobSlice.call(file, start, end));  
+    };  
+  
+    loadNext();  
+}
+</script>
+</div>
+
+<div id="body" class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
+
+    <div class="form-group">
+    <label for="link">秒传链接</label>
+    <textarea name="link" id="link" class="form-control" placeholder="生成的链接 " rows="8"></textarea>
+  </div>
+   <b>所有请求在用户端进行，本站不保存任何链接</b>
+ </div>
+
+</div>
+</div></div>
+</body>
