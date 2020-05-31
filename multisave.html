@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"
     />
-	<title>百度网盘秒传链接转存</title>
+	<title>百度网盘秒传链接批量转存</title>
     <link
       rel="stylesheet"
       href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
@@ -17,7 +17,6 @@
       integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
       crossorigin="anonymous"
     ></script>
-	<meta name="description" content="百度网盘秒传链接在线转存/生成/转换，支持iOS/Android/PC and more"/>
     <script
       src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"
       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
@@ -43,12 +42,22 @@ const input = document.querySelector('#copy_script');
 		alert('复制成功');
 }
 }
+function getLinkMulti(){
+if(document.getElementById('bdstoken').value == ""){
+alert('未输入bdstoken');
+return;
+}
+var links = document.getElementById('link').value.split('\n');
+for(i=0;i<links.length;i++){
+getLink(links[i]);
+}
+}
 function getLink(link) {
 if(document.getElementById('bdstoken').value == ""){
 alert('未输入bdstoken');
 return;
 }
-var bdpan = link.match(/bdpan:\/\/(.+)/);
+var bdpan = link.match(/bdpan:\/\/(.+)/);;
 var pcs = link.match('BaiduPCS-Go');
 var mengji = link.match(/.{32}#.{32}/);
 var bdlink = link.match('bdlink(.+)');
@@ -85,28 +94,31 @@ var bdlink2 = link.match('bdlink\=([a-zA-Z0-9\=\/\+]+\={0,2})$');
 var de_b64;
 if(bdlink1){
 de_b64 = atou(bdlink1[1]);
-if(de_b64.split('\n').length == 1)
+if(de_b64.split('\n').length > 1)
+for (i=0;i<de_b64.split('\n').length;i++)
+getLink(de_b64.split('\n')[i])
+else if(de_b64.split('\n').length == 1)
 getLink(de_b64);
-else
-alert('含多个链接，请使用批量转存');
 }
 else if(bdlink2){
 var de_b64 = atou(bdlink2[1]);
-if(de_b64.split('\n').length == 1)
+if(de_b64.split('\n').length > 1)
+for (i=0;i<de_b64.split('\n').length;i++){
+getLink(de_b64.split('\n')[i])
+}
+else if(de_b64.split('\n').length == 1)
 getLink(de_b64);
-else
-alert('含多个链接，请使用批量转存');
 }
 }
 else if (pan){
 const lib = JsonUrl('lzw');
 lib.decompress(link.match(/^pan:\/\/(.+)/)[1]).then(output => {
-if(output.length>1){alert('含多个链接，请使用批量转存');}
-else
-saveFile(output[0]['content-md5'],output[0]['slice-md5'],output[0]['content-length'],output[0]['path'],'pan');})
+for(i=0;i< output.length;i++){saveFile(output[i]['content-md5'],output[i]['slice-md5'],output[i]['content-length'],output[i]['path'],'pan');}})
 }
-else
-alert('未检测到有效秒传链接')
+else{
+alert('未检测到有效秒传链接');
+return;
+}
 }
 function saveFile(md5,slicemd5,length,name,method){
 var saveForm = document.createElement("form");
@@ -149,15 +161,24 @@ saveForm.submit();
       <div id="container" class="container">
         <div class="row">
 <div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
-<h1>百度网盘秒传链接转存</h1>
+<h1>百度网盘秒传链接批量转存</h1>
 <p>v0.2</p>
 <p>
 <b>请先阅读使用教程</b></br><a href='./manual.html' target=_blank><b>本站使用教程</b></a></br></p>
-<p><a href='./multisave.html'>秒传链接批量转存</a></br>
+<p><a href='./index.html'>秒传链接在线转存</a></br>
 <a href='./gen.html'>秒传链接在线生成</a></br>
 <a href='./convert.html'>秒传链接在线转换</a></p>
-复制代码，粘贴到登录后的<a href="https://pan.baidu.com/disk/home" target=_blank>百度网盘</a>页面地址栏，运行获取bdstoken。</br>
+<p><b>批量转存必读</b>
+</br>
+<b>请允许本站弹出多个窗口以实现批量请求</b></br>
+<img src="https://s1.ax1x.com/2020/05/10/Y1OqX9.png" height="212">
+</p>
+</br>
+复制代码，粘贴到<a href="https://pan.baidu.com/disk/home" target=_blank>百度网盘</a>地址栏，运行获取bdstoken</br>
 如果代码开头的 <b>javascript:</b> 消失，请手动添加 <b>javascript:</b></br>
+
+
+
 </div>
 <div class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
 <p><input class="form-control" id="copy_script" value="javascript:for(i=0;i < document.getElementsByTagName('script').length;i++){var scripts=document.getElementsByTagName('script')[i].innerHTML.match(/\&quot;bdstoken\&quot;\:\&quot;(\w{32})\&quot;/);if(scripts!=null){var bdstoken=scripts[0].match(/\&quot;bdstoken\&quot;\:\&quot;(\w{32})\&quot;/)[1];}}const input=document.createElement('input');document.body.appendChild(input);input.setAttribute('value',bdstoken);input.select();if(document.execCommand('copy')){document.execCommand('copy');alert('bdstoken '+bdstoken+'\n复制成功');}document.body.removeChild(input);">
@@ -174,39 +195,17 @@ saveForm.submit();
   </div>
   <div>
   <label for="link">秒传链接</label>
-  <p><input name="link" id="link" class="form-control" placeholder="bdpan... / BaiduPCS-Go ... / 5b1...#b3a... "></p>
+  <p><textarea name="link" id="link" class="form-control" placeholder="bdpan... / BaiduPCS-Go ... / 5b1...#b3a... " rows=6></textarea></p>
   </div>
-  <p><button onclick="getLink(document.getElementById('link').value);" class="btn btn-primary">解析链接并转存</button></p>
-<a data-toggle="collapse" data-parent="#body" href="#collapseOne">
-<p>手动输入文件属性</p>
-</a>
-<div id="collapseOne" class="panel-collapse collapse in">
-<form id="save" action='' method='POST' target=_blank>
-  <div>
-    <label for="path">文件保存路径</label>
-    <input name="path" class="form-control" id="path" placeholder="/数理化.doc">
-  </div>
-  <div>
-    <label for="length">文件大小(length)</label>
-    <input name="content-length" class="form-control" id="length" placeholder="1710630793">
-  </div>
-  <div>
-    <label for="md5">文件MD5</label>
-    <input name="content-md5" class="form-control" id="md5" placeholder="b3a90c47ea23b00aad062a09e33d6ce7">
-  </div>
-  <div>
-    <label for="slicemd5">前256KB分片MD5(slicemd5)</label>
-    <input name="slice-md5" class="form-control" id="slicemd5" placeholder="5b1cfe5072aabc737e6facce6d1c3be8">
-  </div>
-  </br>
-  <p><button onclick=addbdstoken(); class="btn btn-primary">转存</button></p>
+  <p><button onclick=getLinkMulti(); class="btn btn-primary">解析链接并转存</button></p>
   
-</form>
 </div>
+<div id="footer" class="col-sm-8 offset-sm-2 col-md-6 offset-md-3 text-center">
 <p>显示 {"errno":2} 为保存失败，检查输入的内容是否正确</br>{"errno":404} 为服务器无对应文件</br>{"errno":-6} 为未登录</br>{"errno":0} 为保存成功
 </br>
 <b>所有请求在用户端进行，本站不保存任何链接</b>
 </p>
+</div>
 </div>
 </div></div></div>
 </body>
